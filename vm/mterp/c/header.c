@@ -427,8 +427,10 @@ static inline void putDoubleToArrayTaint(u4* ptr, int idx, double dval)
 # define SET_REGISTER_TAINT_AS_OBJECT(_idx, _val) SET_REGISTER_TAINT(_idx, _val)
 
 /* Object Taint interface */
-# define GET_ARRAY_TAINT(_arr)		      ((_arr)->taint.tag)
-# define SET_ARRAY_TAINT(_arr, _val)	      ((_arr)->taint.tag = (u4)(_val))
+/* # define GET_ARRAY_TAINT(_arr)		      ((_arr)->taintCache.tag)*/
+# define GET_ARRAY_TAINT(_arr)		      (dvmCalculateArrayTaint((_arr)).tag)
+/* # define SET_ARRAY_TAINT(_arr, _val)	      ((_arr)->taintCache.tag = (u4)(_val))*/
+/*# define SET_ARRAY_TAINT(_arr, _val)      (dvmUpdateArrayIndexTaints((_arr), (Taint) tag))*/
 
 /* Return value taint (assumes rtaint variable is in scope */
 # define GET_RETURN_TAINT()		      (rtaint.tag)

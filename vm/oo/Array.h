@@ -173,4 +173,21 @@ size_t dvmArrayObjectSize(const ArrayObject *array);
  */
 size_t dvmArrayClassElementWidth(const ClassObject* clazz);
 
+#ifdef WITH_TAINT_TRACKING
+
+/* Returns taints composed of the taints of individual array elements. */
+Taint dvmCalculateArrayTaint(ArrayObject *array);
+
+/* Updates each element in the array with the tag. */
+void dvmUpdateArrayIndexTaints(ArrayObject *array, Taint tag);
+
+/* Copies the shadow array taints from src, to dst. */
+void dvmCopyArrayIndextaints(ArrayObject *dst, u4 dstPos, ArrayObject *src,
+        u4 srcPos, u4 count);
+
+/* Updates the index's taint with the tag parameter. */
+void dvmUpdateArrayIndexTaint(ArrayObject *arrObj, Taint tag, u4 pos);
+
+#endif /* WITH_TAINT_TRACKING */
+
 #endif /*_DALVIK_OO_ARRAY*/

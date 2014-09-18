@@ -72,7 +72,8 @@ static void Dalvik_java_lang_System_arraycopy(const u4* args, JValue* pResult)
     dstPos = args[3];
     length = args[4];
 #ifdef WITH_TAINT_TRACKING
-    int srcPosTaint = args[7];
+    Taint srcPosTaint;
+    srcPosTaint.tag = args[7];
 #endif /*WITH_TAINT_TRACKING*/
 
     sameArray = (srcArray == dstArray);
@@ -158,11 +159,22 @@ static void Dalvik_java_lang_System_arraycopy(const u4* args, JValue* pResult)
                 length * width,
                 sameArray, width);
 #ifdef WITH_TAINT_TRACKING
+        dvmCopyArrayIndexTaints(dstArray, dstPos, srcArray, srcPos, length);
+        dvmUpdateArrayIndexTaints(dstArray, srcPosTaint);
         if (dstPos == 0 && dstArray->length == length) {
         	/* entire array replaced */
-        	dstArray->taint.tag = (srcArray->taint.tag | srcPosTaint);
+            /*
+            dstArray->cachedTaint.tag = (COMBINE_TAINT_TAGS(
+                        srcArray->cachedTaint.tag, srcPosTaint));
+                        */
         } else {
-		dstArray->taint.tag |= (srcArray->taint.tag | srcPosTaint);
+            /*
+            u4 tmpTag;
+            tmpTag = (COMBINE_TAINT_TAGS(
+                        srcArray->cachedTaint.tag, srcPosTaint));
+            dstArray->cachedTaint.tag = COMBINE_TAINT_TAGS(
+                    dstArray->cachedTaint.tag, tmpTag);
+                    */
         }
 #endif
     } else {
@@ -189,11 +201,20 @@ static void Dalvik_java_lang_System_arraycopy(const u4* args, JValue* pResult)
                     sameArray, width);
             dvmWriteBarrierArray(dstArray, dstPos, dstPos+length);
 #ifdef WITH_TAINT_TRACKING
+            dvmCopyArrayIndexTaints(dstArray, dstPos, srcArray, srcPos, length);
+            dvmUpdateArrayIndexTaints(dstArray, srcPosTaint);
             if (dstPos == 0 && dstArray->length == length) {
             	/* entire array replaced */
-            	dstArray->taint.tag = (srcArray->taint.tag | srcPosTaint);
+                /*
+                dvmUpdateArrayIndexTaints(srcArray, srcPostaint);
+                dstArray->cachedTaint.tag = (COMBINE_TAINT_TAGS(
+                            srcArray->cachedTaint.tag, srcPosTaint));
+                            */
             } else {
-		dstArray->taint.tag |= (srcArray->taint.tag | srcPosTaint);
+                /*
+                dstArray->cachedTaint.tag = (COMBINE_TAINT_TAGS(
+                            srcArray->cachedTaint.tag, srcPosTaint));
+                            */
             }
 #endif
         } else {
@@ -245,11 +266,19 @@ static void Dalvik_java_lang_System_arraycopy(const u4* args, JValue* pResult)
                     sameArray, width);
             dvmWriteBarrierArray(dstArray, 0, copyCount);
 #ifdef WITH_TAINT_TRACKING
+            dvmCopyArrayIndexTaints(dstArray, dstPos, srcArray, srcPos, length);
+            dvmUpdateArrayIndexTaints(dstArray, srcPosTaint);
             if (dstPos == 0 && dstArray->length == length) {
             	/* entire array replaced */
-            	dstArray->taint.tag = (srcArray->taint.tag | srcPosTaint);
+                /*
+                dstArray->cachedTaint.tag = (COMBINE_TAINT_TAGS(
+                            srcArray->cachedTaint.tag, srcPosTaint));
+                            */
             } else {
-		dstArray->taint.tag |= (srcArray->taint.tag | srcPosTaint);
+                /*
+                dstArray->cachedTaint.tag = (COMBINE_TAINT_TAGS(
+                            srcArray->cachedTaint.tag, srcPosTaint));
+                            */
             }
 #endif
             if (copyCount != length) {

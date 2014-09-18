@@ -309,8 +309,10 @@ struct ArrayObject {
     u4              length;
 
 #ifdef WITH_TAINT_TRACKING
-    Taint           taint;
-#endif
+    Taint           taintCache;
+    Taint           *itemTaint;
+    u4              dirty;
+#endif /* WITH_TAINT_TRACKING */
 
     /*
      * Array contents; actual size is (length * sizeof(type)).  This is

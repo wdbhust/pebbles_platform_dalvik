@@ -298,18 +298,20 @@ MTERP_CONSTANT(LW_LOCK_OWNER_SHIFT, 3)
 MTERP_CONSTANT(LW_HASH_STATE_SHIFT, 1)
 
 /* ArrayObject fields */
-MTERP_OFFSET(offArrayObject_length,     ArrayObject, length, 8)
+MTERP_OFFSET(offArrayObject_length,     ArrayObject, length,      8)
 #ifdef WITH_TAINT_TRACKING
-MTERP_OFFSET(offArrayObject_taint,	ArrayObject, taint, 12)
+MTERP_OFFSET(offArrayObject_taint,      ArrayObject, taintCache, 12)
+MTERP_OFFSET(offArrayObject_itemTaint, ArrayObject, itemTaint,  16);
+MTERP_OFFSET(offArrayObject_dirty,      ArrayObject, dirty,       20);
 #endif
 
 #ifdef WITH_TAINT_TRACKING
 /*-----------------------------------------------------------------*/
 /* The extra 4 bytes for the taint tag makes these the same */
 #ifdef MTERP_NO_UNALIGN_64
-MTERP_OFFSET(offArrayObject_contents,   ArrayObject, contents, 16)
+MTERP_OFFSET(offArrayObject_contents,   ArrayObject, contents, 24)
 #else
-MTERP_OFFSET(offArrayObject_contents,   ArrayObject, contents, 16)
+MTERP_OFFSET(offArrayObject_contents,   ArrayObject, contents, 24)
 #endif
 /*-----------------------------------------------------------------*/
 #else /* ndef WITH_TAINT_TRACKING */

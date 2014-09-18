@@ -939,6 +939,22 @@ dvmHeapSourceAllocAndGrow(size_t n)
     return ptr;
 }
 
+#ifdef WITH_TAINT_TRACKING
+/* Frees the item taints array if it exists. */
+static void dvmFreeItemTaints(Object *obj) {
+    /*
+    ArrayObject *arrObj;
+    if (obj != NULL && obj->clazz->descriptor[0] == '[') {
+        arrObj = (ArrayObject *) obj;
+        if (arrObj->itemTaint != NULL) {
+            free(arrObj->itemTaint);
+            arrObj->itemTaint = NULL;
+        }
+    }
+    */
+}
+#endif /* WITH_TAINT_TRACKING */
+
 /*
  * Frees the first numPtrs objects in the ptrs list and returns the
  * amount of reclaimed storage. The list must contain addresses all in
@@ -986,6 +1002,10 @@ size_t dvmHeapSourceFreeList(size_t numPtrs, void **ptrs)
             countFree(heap, ptrs[0], &numBytes);
             void *merged = ptrs[0];
 
+#ifdef WITH_TAINT_TRACKING
+            dvmFreeItemTaints((Object *) ptrs[0]);
+#endif /* WITH_TAINT_TRACKING */
+
             size_t i;
             for (i = 1; i < numPtrs; i++) {
                 assert(merged != NULL);
@@ -998,9 +1018,17 @@ size_t dvmHeapSourceFreeList(size_t numPtrs, void **ptrs)
                 // see if ptrs[i] starts a new run of adjacent
                 // objects to merge.
                 if (mspace_merge_objects(msp, merged, ptrs[i]) == NULL) {
+#ifdef WITH_TAINT_TRACKING
+                    dvmFreeItemTaints((Object *) ptrs[i]);
+#endif /* WITH_TAINT_TRACKING */
                     mspace_free(msp, merged);
                     merged = ptrs[i];
                 }
+#ifdef WITH_TAINT_TRACKING
+                else {
+                    dvmFreeItemTaints((Object *) ptrs[i]);
+                }
+#endif /* WITH_TAINT_TRACKING */
             }
             assert(merged != NULL);
             mspace_free(msp, merged);

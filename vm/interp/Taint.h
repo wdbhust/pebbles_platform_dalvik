@@ -47,4 +47,24 @@ typedef struct Taint {
 #define TAINT_ACCOUNT       ((u4)0x00004000) /* User account information */
 #define TAINT_HISTORY       ((u4)0x00008000) /* browser history */
 
+INLINE u4 COMBINE_TAINT_TAGS(u4 origTag, u4 newTag)
+{
+    if (origTag == newTag) return origTag;
+    else if (origTag == TAINT_CLEAR) return newTag;
+    else if (newTag == TAINT_CLEAR) return origTag;
+    else return newTag | origTag;
+}
+
+INLINE Taint COMBINE_TAINT(Taint origTaint, Taint newTaint)
+{
+    Taint returnTaint;
+    returnTaint.tag = COMBINE_TAINT_TAGS(origTaint.tag, newTaint.tag);
+    return returnTaint;
+}
+
+INLINE Taint CHOOSE_TAINT(Taint origTaint, Taint newTaint)
+{
+    return COMBINE_TAINT(origTaint, newTaint);
+}
+
 #endif /*_DALVIK_INTERP_TAINT*/
