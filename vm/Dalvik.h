@@ -89,6 +89,8 @@
 #ifdef WITH_TAINT_TRACKING
 #include "interp/Taint.h"
 #include "tprop/TaintProp.h"
+
+#include "MultiTaintTable.h"
 #endif
 
 #endif /*_DALVIK_DALVIK*/

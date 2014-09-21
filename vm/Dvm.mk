@@ -209,6 +209,7 @@ ifeq ($(WITH_TAINT_TRACKING), true)
 	LOCAL_SRC_FILES += native/dalvik_system_Taint.c
 	LOCAL_SRC_FILES += tprop/TaintProp.c
 	LOCAL_SRC_FILES += tprop/TaintPolicy.c
+	LOCAL_SRC_FILES += MultiTaintTable.c
 endif
 
 WITH_COPYING_GC := $(strip $(WITH_COPYING_GC))

@@ -61,6 +61,21 @@ typedef enum ExecutionMode {
 #endif
 } ExecutionMode;
 
+/* Lookup table for related taints. */
+#ifndef NUM_MULTI_TAINTS
+#define NUM_MULTI_TAINTS 1024
+#endif  // NUM_MULTI_TAINTS
+
+struct MultiTaintTable {
+    u1         usedMultiTaintIds[NUM_MULTI_TAINTS];
+    int        unusedIndexHint;
+    HashTable* indexById;
+    HashTable* indexByGuids;
+    HashTable* lock;  // a pointer to which table to use to lock.
+    bool       initialized;
+};
+typedef struct MultiTaintTable MultiTaintTable;
+
 /*
  * All fields are initialized to zero.
  *
@@ -665,6 +680,10 @@ struct DvmGlobals {
     pid_t systemServerPid;
 
     int kernelGroupScheduling;
+
+#ifdef WITH_TAINT_TRACKING
+    MultiTaintTable multiTaintTable;
+#endif /* WITH_TAINT_TRACKING */
 
 //#define COUNT_PRECISE_METHODS
 #ifdef COUNT_PRECISE_METHODS
