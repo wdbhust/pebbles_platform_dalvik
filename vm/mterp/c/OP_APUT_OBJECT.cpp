@@ -2,6 +2,7 @@ HANDLE_OPCODE(OP_APUT_OBJECT /*vAA, vBB, vCC*/)
     {
         ArrayObject* arrayObj;
         Object* obj;
+        Taint newTaint;
         u2 arrayInfo;
         EXPORT_PC();
         vdst = INST_AA(inst);       /* AA: source value */
@@ -34,9 +35,13 @@ HANDLE_OPCODE(OP_APUT_OBJECT /*vAA, vBB, vCC*/)
                                  GET_REGISTER(vsrc2),
                                  (Object *)GET_REGISTER(vdst));
 /* ifdef WITH_TAINT_TRACKING */
-	SET_ARRAY_TAINT(arrayObj,
+	/*
+     * SET_ARRAY_TAINT(arrayObj,
 		(GET_ARRAY_TAINT(arrayObj) |
 		 GET_REGISTER_TAINT(vdst)) );
+         */
+       newTaint.tag = GET_REGISTER_TAINT(vdst);
+       SET_ARRAY_INDEX_TAINT(arrayObj, newTaint, GET_REGISTER(vsrc2));
 /* endif */
     }
     FINISH(2);

@@ -60,7 +60,7 @@ static ArrayObject* allocArray(ClassObject* arrayClass, size_t length,
         DVM_OBJECT_INIT(newArray, arrayClass);
         newArray->length = length;
 #ifdef WITH_TAINT_TRACKING
-        newArray->taint.tag = TAINT_CLEAR;
+        newArray->taintCache.tag = TAINT_CLEAR;
 #endif
         dvmTrackAllocation(arrayClass, totalSize);
     }
@@ -630,3 +630,137 @@ size_t dvmArrayObjectSize(const ArrayObject *array)
     size += array->length * dvmArrayClassElementWidth(array->clazz);
     return size;
 }
+
+#ifdef WITH_TAINT_TRACKING
+
+#define ARRAY_CLEAN_TAINT 0
+#define ARRAY_DIRTY_TAINT 1
+
+/* Calculate the array's taint. */
+Taint dvmCalculateArrayTaint(ArrayObject *array)
+{
+    Taint newTaint;
+    newTaint.tag = TAINT_CLEAR;
+    /*
+     * TODO: Implement multitaint.
+     * newTaint.multiTaint = 0;
+     */
+    if (array->dirty) {
+        /*
+        dvmMultiTaintTableRemoveMultiTaint(array->cachedTaint.tag);
+         * TODO Implement multitaint.
+         * array->cachedTaint.multiTaint = 0;
+         */
+        u4 length = array->length;
+        u4 index;
+        for (index = 0; index < length; index++) {
+            Taint itemTaint = array->itemTaint[index];
+            /*
+            * TODO Implement multitaint.
+            * itemTaint.multiTaint = 0;
+            */
+            newTaint.tag = newTaint.tag | itemTaint.tag;
+        }
+        array->taintCache = newTaint;
+        array->dirty = ARRAY_CLEAN_TAINT;
+    }
+    return newTaint;
+}
+
+/* Update the taint for each of the itemTaints. */
+void dvmUpdateArrayIndexTaints(ArrayObject *array, Taint tag)
+{
+    u4 length = array->length;
+    u4 index;
+    for (index = 0; index < length; index++)
+    {
+        dvmUpdateArrayIndexTaint(array, tag, index);
+    }
+}
+
+static void dvmAllocateItemTaint(ArrayObject *arrObj)
+{
+    u4 index;
+    size_t itemTaintSize;
+    itemTaintSize = sizeof(Taint) * arrObj->length;
+    if ((arrObj->itemTaint = (Taint *)malloc(itemTaintSize)) == NULL) {
+        ALOGE("dvmAllocateItemTaint: No free memory. Aborting.\n");
+        dvmAbort();
+    }
+
+    for (index = 0; index < arrObj->length; index++) {
+        arrObj->itemTaint[index].tag = TAINT_CLEAR;
+    }
+}
+
+/* Copies the taint array from the src object to the dst object. */
+void dvmCopyArrayIndexTaints(ArrayObject *dst, u4 dstPos,
+        ArrayObject *src, u4 srcPos, u4 count)
+{
+    u4 index;
+    if (dst->itemTaint != NULL) {
+      if (src->itemTaint == NULL) {
+          dvmAllocateItemTaint(src);
+      }
+      for (index = 0; index < count; index++)
+      {
+          dst->itemTaint[index + dstPos].tag =
+              src->itemTaint[index + srcPos].tag;
+      }
+    }
+}
+
+/* Sets the item array to a given taint. */
+void dvmSetArrayIndexTaint(ArrayObject *arrObj, Taint tag, u4 pos)
+{
+       if (pos < arrObj->length) {
+        if (arrObj->itemTaint == NULL) {
+            dvmAllocateItemTaint(arrObj);
+        }
+        arrObj->itemTaint[pos] = tag;
+        arrObj->dirty = ARRAY_DIRTY_TAINT;
+    } else {
+        ALOGE("dvmSetArrayIndexTaint: array index out of bounds.");
+        dvmAbort();
+    }
+}
+
+void dvmUpdateArrayIndexTaint(ArrayObject *arrObj, Taint tag,
+        u4 pos)
+{
+    if (tag.tag == TAINT_CLEAR) {
+        return;
+    }
+    if (arrObj->itemTaint == NULL) {
+        dvmAllocateItemTaint(arrObj);
+    }
+    if (pos < arrObj->length) {
+        arrObj->itemTaint[pos].tag = arrObj->itemTaint[pos].tag | tag.tag;
+    } else {
+        ALOGE("dvmUpdateArrayIndexTaint: array index out of bounds.");
+        dvmAbort();
+    }
+}
+
+/* Get the itemTaint from given position. */
+Taint dvmGetArrayIndexTaint(ArrayObject *arrObj, u4 pos)
+{
+    Taint retTaint;
+    retTaint.tag = TAINT_CLEAR;
+    if (arrObj) {
+        if (pos < arrObj->length) {
+            if (arrObj->itemTaint == NULL) {
+                retTaint.tag = TAINT_CLEAR;
+            } else {
+                retTaint.tag = arrObj->itemTaint[pos].tag;
+            }
+        } else {
+            ALOGE("dvmGetArrayIndexTaint: array index out of bounds.");
+            dvmAbort();
+        }
+    }
+
+    return retTaint;
+}
+
+#endif /* WITH_TAINT_TRACKING */

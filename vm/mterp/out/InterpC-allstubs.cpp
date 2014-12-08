@@ -408,8 +408,10 @@ static inline void putDoubleToArrayTaint(u4* ptr, int idx, double dval)
 # define SET_REGISTER_TAINT_AS_OBJECT(_idx, _val) SET_REGISTER_TAINT(_idx, _val)
 
 /* Object Taint interface */
-# define GET_ARRAY_TAINT(_arr)		      ((_arr)->taint.tag)
-# define SET_ARRAY_TAINT(_arr, _val)	      ((_arr)->taint.tag = (u4)(_val))
+/* # define GET_ARRAY_TAINT(_arr)		      ((_arr)->taint.tag)*/
+# define GET_ARRAY_TAINT(_arr) (dvmCalculateArrayTaint((_arr)).tag)
+/*# define SET_ARRAY_TAINT(_arr, _val)	      ((_arr)->taint.tag = (u4)(_val))*/
+# define SET_ARRAY_INDEX_TAINT(_arr, _taint, _index) (dvmUpdateArrayIndexTaint((_arr), _taint, _index))
 
 /* Return value taint (assumes rtaint variable is in scope */
 # define GET_RETURN_TAINT()		      (rtaint.tag)
@@ -1228,6 +1230,7 @@ GOTO_TARGET_DECL(exceptionThrown);
     {                                                                       \
         ArrayObject* arrayObj;                                              \
         u2 arrayInfo;                                                       \
+        Taint newTaint;                                                     \
         EXPORT_PC();                                                        \
         vdst = INST_AA(inst);       /* AA: source value */                  \
         arrayInfo = FETCH(1);                                               \
@@ -1246,9 +1249,11 @@ GOTO_TARGET_DECL(exceptionThrown);
         ((_type*)(void*)arrayObj->contents)[GET_REGISTER(vsrc2)] =          \
             GET_REGISTER##_regsize(vdst);                                   \
 /* ifdef WITH_TAINT_TRACKING */						    \
-	SET_ARRAY_TAINT(arrayObj,                                           \
-		(GET_ARRAY_TAINT(arrayObj) |                                \
-		 GET_REGISTER_TAINT##_regsize(vdst)) );                     \
+    newTaint.tag = GET_REGISTER_TAINT##_regsize(vdst);                      \
+    SET_ARRAY_INDEX_TAINT(arrayObj, newTaint, GET_REGISTER(vsrc2));         \
+	/*SET_ARRAY_TAINT(arrayObj,                                           */\
+		/*(GET_ARRAY_TAINT(arrayObj) |                                */\
+		 /*GET_REGISTER_TAINT##_regsize(vdst)) );                     */\
 /* endif */								    \
     }                                                                       \
     FINISH(2);
@@ -2407,6 +2412,7 @@ HANDLE_OPCODE(OP_APUT_OBJECT /*vAA, vBB, vCC*/)
     {
         ArrayObject* arrayObj;
         Object* obj;
+        Taint newTaint;
         u2 arrayInfo;
         EXPORT_PC();
         vdst = INST_AA(inst);       /* AA: source value */
@@ -2439,9 +2445,13 @@ HANDLE_OPCODE(OP_APUT_OBJECT /*vAA, vBB, vCC*/)
                                  GET_REGISTER(vsrc2),
                                  (Object *)GET_REGISTER(vdst));
 /* ifdef WITH_TAINT_TRACKING */
-	SET_ARRAY_TAINT(arrayObj,
+	/*
+     * SET_ARRAY_TAINT(arrayObj,
 		(GET_ARRAY_TAINT(arrayObj) |
 		 GET_REGISTER_TAINT(vdst)) );
+         */
+       newTaint.tag = GET_REGISTER_TAINT(vdst);
+       SET_ARRAY_INDEX_TAINT(arrayObj, newTaint, GET_REGISTER(vsrc2));
 /* endif */
     }
     FINISH(2);

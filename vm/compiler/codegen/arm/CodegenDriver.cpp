@@ -463,7 +463,8 @@ static void genArrayGet(CompilationUnit *cUnit, MIR *mir, OpSize size,
 #ifdef WITH_TAINT_TRACKING
     int indexTaint = dvmCompilerAllocTemp(cUnit);
     loadTaintDirect(cUnit, rlIndex, indexTaint);
-    int taintOffset = OFFSETOF_MEMBER(ArrayObject, taint);
+    /* TODO: Explore this to see how it handles taint gets. */
+    int taintOffset = OFFSETOF_MEMBER(ArrayObject, taintCache);
 #endif /*WITH_TAINT_TRACKING*/
     RegLocation rlResult;
     rlArray = loadValue(cUnit, rlArray, kCoreReg);
@@ -552,7 +553,7 @@ static void genArrayPut(CompilationUnit *cUnit, MIR *mir, OpSize size,
 #ifdef WITH_TAINT_TRACKING
     int argTaint = dvmCompilerAllocTemp(cUnit);
     loadTaintDirect(cUnit, rlArray, argTaint);
-    int taintOffset = OFFSETOF_MEMBER(ArrayObject, taint);
+    int taintOffset = OFFSETOF_MEMBER(ArrayObject, taintCache);
 #endif /*WITH_TAINT_TRACKING*/
 
     int regPtr;
@@ -660,7 +661,7 @@ static void genArrayObjectPut(CompilationUnit *cUnit, MIR *mir,
     int argTaint = dvmCompilerAllocTemp(cUnit);
     int arrayTaint = dvmCompilerAllocTemp(cUnit);
 
-    int taintOffset = OFFSETOF_MEMBER(ArrayObject, taint);
+    int taintOffset = OFFSETOF_MEMBER(ArrayObject, taintCache);
 
     loadTaintDirect(cUnit, rlArray, argTaint);
     loadWordDisp(cUnit, regArray, taintOffset, arrayTaint);
@@ -4294,7 +4295,7 @@ static bool genInlinedStringCharAt(CompilationUnit *cUnit, MIR *mir)
 #ifdef WITH_TAINT_TRACKING
     int strTaint = dvmCompilerAllocTemp(cUnit);
     int idxTaint = dvmCompilerAllocTemp(cUnit);
-    int taintOffset = OFFSETOF_MEMBER(ArrayObject, taint);
+    int taintOffset = OFFSETOF_MEMBER(ArrayObject, taintCache);
     loadWordDisp(cUnit, regPtr, taintOffset, strTaint);
     loadTaintDirect(cUnit, rlIdx, idxTaint);
 #endif /*WITH_TAINT_TRACKING*/

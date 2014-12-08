@@ -40,7 +40,10 @@ static void Dalvik_dalvik_system_Taint_addTaintString(const u4* args,
 
     if (strObj) {
     value = strObj->array();
-	value->taint.tag |= tag;
+	//value->taint.tag |= tag;
+    Taint taint;
+    taint.tag = tag;
+    dvmUpdateArrayIndexTaints(value, taint);
     }
     RETURN_VOID();
 }
@@ -54,7 +57,10 @@ static void Dalvik_dalvik_system_Taint_addTaintObjectArray(const u4* args,
     ArrayObject *arr = (ArrayObject *) args[0];
     u4 tag = args[1];
     if (arr) {
-	arr->taint.tag |= tag;
+	//arr->taint.tag |= tag;
+    Taint taint;
+    taint.tag = tag;
+    dvmUpdateArrayIndexTaints(arr, taint);
     }
     RETURN_VOID();
 }
@@ -68,7 +74,10 @@ static void Dalvik_dalvik_system_Taint_addTaintBooleanArray(const u4* args,
     ArrayObject *arr = (ArrayObject *) args[0];
     u4 tag = args[1];
     if (arr) {
-	arr->taint.tag |= tag;
+	//arr->taint.tag |= tag;
+    Taint taint;
+    taint.tag = tag;
+    dvmUpdateArrayIndexTaints(arr, taint);
     }
     RETURN_VOID();
 }
@@ -82,7 +91,10 @@ static void Dalvik_dalvik_system_Taint_addTaintCharArray(const u4* args,
     ArrayObject *arr = (ArrayObject *) args[0];
     u4 tag = args[1];
     if (arr) {
-	arr->taint.tag |= tag;
+	//arr->taint.tag |= tag;
+    Taint taint;
+    taint.tag = tag;
+    dvmUpdateArrayIndexTaints(arr, taint);
     }
     RETURN_VOID();
 }
@@ -96,7 +108,10 @@ static void Dalvik_dalvik_system_Taint_addTaintByteArray(const u4* args,
     ArrayObject *arr = (ArrayObject *) args[0];
     u4 tag = args[1];
     if (arr) {
-	arr->taint.tag |= tag;
+	//arr->taint.tag |= tag;
+    Taint taint;
+    taint.tag = tag;
+    dvmUpdateArrayIndexTaints(arr, taint);
     }
     RETURN_VOID();
 }
@@ -110,7 +125,10 @@ static void Dalvik_dalvik_system_Taint_addTaintIntArray(const u4* args,
     ArrayObject *arr = (ArrayObject *) args[0];
     u4 tag = args[1];
     if (arr) {
-	arr->taint.tag |= tag;
+	//arr->taint.tag |= tag;
+    Taint taint;
+    taint.tag = tag;
+    dvmUpdateArrayIndexTaints(arr, taint);
     }
     RETURN_VOID();
 }
@@ -124,7 +142,10 @@ static void Dalvik_dalvik_system_Taint_addTaintShortArray(const u4* args,
     ArrayObject *arr = (ArrayObject *) args[0];
     u4 tag = args[1];
     if (arr) {
-	arr->taint.tag |= tag;
+	//arr->taint.tag |= tag;
+    Taint taint;
+    taint.tag = tag;
+    dvmUpdateArrayIndexTaints(arr, taint);
     }
     RETURN_VOID();
 }
@@ -138,7 +159,10 @@ static void Dalvik_dalvik_system_Taint_addTaintLongArray(const u4* args,
     ArrayObject *arr = (ArrayObject *) args[0];
     u4 tag = args[1];
     if (arr) {
-	arr->taint.tag |= tag;
+	//arr->taint.tag |= tag;
+    Taint taint;
+    taint.tag = tag;
+    dvmUpdateArrayIndexTaints(arr, taint);
     }
     RETURN_VOID();
 }
@@ -152,7 +176,10 @@ static void Dalvik_dalvik_system_Taint_addTaintFloatArray(const u4* args,
     ArrayObject *arr = (ArrayObject *) args[0];
     u4 tag = args[1];
     if (arr) {
-	arr->taint.tag |= tag;
+	//arr->taint.tag |= tag;
+    Taint taint;
+    taint.tag = tag;
+    dvmUpdateArrayIndexTaints(arr, taint);
     }
     RETURN_VOID();
 }
@@ -166,7 +193,10 @@ static void Dalvik_dalvik_system_Taint_addTaintDoubleArray(const u4* args,
     ArrayObject *arr = (ArrayObject *) args[0];
     u4 tag = args[1];
     if (arr) {
-	arr->taint.tag |= tag;
+	// arr->taint.tag |= tag;
+    Taint taint;
+    taint.tag = tag;
+    dvmUpdateArrayIndexTaints(arr, taint);
     }
     RETURN_VOID();
 }
@@ -296,7 +326,8 @@ static void Dalvik_dalvik_system_Taint_getTaintString(const u4* args,
 
     if (strObj) {
     value = strObj->array();
-	RETURN_INT(value->taint.tag);
+	// RETURN_INT(value->taint.tag);
+    RETURN_INT(dvmCalculateArrayTaint(value).tag);
     } else {
 	RETURN_INT(TAINT_CLEAR);
     }
@@ -310,7 +341,8 @@ static void Dalvik_dalvik_system_Taint_getTaintObjectArray(const u4* args,
 {
     ArrayObject *arr = (ArrayObject *) args[0];
     if (arr) {
-	RETURN_INT(arr->taint.tag);
+	// RETURN_INT(arr->taint.tag);
+    RETURN_INT(dvmCalculateArrayTaint(arr).tag);
     } else {
 	RETURN_INT(TAINT_CLEAR);
     }
@@ -324,7 +356,8 @@ static void Dalvik_dalvik_system_Taint_getTaintBooleanArray(const u4* args,
 {
     ArrayObject *arr = (ArrayObject *) args[0];
     if (arr) {
-	RETURN_INT(arr->taint.tag);
+	// RETURN_INT(arr->taint.tag);
+    RETURN_INT(dvmCalculateArrayTaint(arr).tag);
     } else {
 	RETURN_INT(TAINT_CLEAR);
     }
@@ -338,7 +371,8 @@ static void Dalvik_dalvik_system_Taint_getTaintCharArray(const u4* args,
 {
     ArrayObject *arr = (ArrayObject *) args[0];
     if (arr) {
-	RETURN_INT(arr->taint.tag);
+	//RETURN_INT(arr->taint.tag);
+    RETURN_INT(dvmCalculateArrayTaint(arr).tag);
     } else {
 	RETURN_INT(TAINT_CLEAR);
     }
@@ -352,7 +386,8 @@ static void Dalvik_dalvik_system_Taint_getTaintByteArray(const u4* args,
 {
     ArrayObject *arr = (ArrayObject *) args[0];
     if (arr) {
-	RETURN_INT(arr->taint.tag);
+	// RETURN_INT(arr->taint.tag);
+    RETURN_INT(dvmCalculateArrayTaint(arr).tag);
     } else {
 	RETURN_INT(TAINT_CLEAR);
     }
@@ -366,7 +401,8 @@ static void Dalvik_dalvik_system_Taint_getTaintIntArray(const u4* args,
 {
     ArrayObject *arr = (ArrayObject *) args[0];
     if (arr) {
-	RETURN_INT(arr->taint.tag);
+	//RETURN_INT(arr->taint.tag);
+    RETURN_INT(dvmCalculateArrayTaint(arr).tag);
     } else {
 	RETURN_INT(TAINT_CLEAR);
     }
@@ -380,7 +416,8 @@ static void Dalvik_dalvik_system_Taint_getTaintShortArray(const u4* args,
 {
     ArrayObject *arr = (ArrayObject *) args[0];
     if (arr) {
-	RETURN_INT(arr->taint.tag);
+	//RETURN_INT(arr->taint.tag);
+    RETURN_INT(dvmCalculateArrayTaint(arr).tag);
     } else {
 	RETURN_INT(TAINT_CLEAR);
     }
@@ -394,7 +431,8 @@ static void Dalvik_dalvik_system_Taint_getTaintLongArray(const u4* args,
 {
     ArrayObject *arr = (ArrayObject *) args[0];
     if (arr) {
-	RETURN_INT(arr->taint.tag);
+	//RETURN_INT(arr->taint.tag);
+    RETURN_INT(dvmCalculateArrayTaint(arr).tag);
     } else {
 	RETURN_INT(TAINT_CLEAR);
     }
@@ -408,7 +446,8 @@ static void Dalvik_dalvik_system_Taint_getTaintFloatArray(const u4* args,
 {
     ArrayObject *arr = (ArrayObject *) args[0];
     if (arr) {
-	RETURN_INT(arr->taint.tag);
+	//RETURN_INT(arr->taint.tag);
+    RETURN_INT(dvmCalculateArrayTaint(arr).tag);
     } else {
 	RETURN_INT(TAINT_CLEAR);
     }
@@ -422,7 +461,8 @@ static void Dalvik_dalvik_system_Taint_getTaintDoubleArray(const u4* args,
 {
     ArrayObject *arr = (ArrayObject *) args[0];
     if (arr) {
-	RETURN_INT(arr->taint.tag);
+	// RETURN_INT(arr->taint.tag);
+    RETURN_INT(dvmCalculateArrayTaint(arr).tag);
     } else{
 	RETURN_INT(TAINT_CLEAR);
     }

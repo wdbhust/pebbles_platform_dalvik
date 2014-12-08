@@ -546,6 +546,7 @@ GOTO_TARGET_DECL(exceptionThrown);
     {                                                                       \
         ArrayObject* arrayObj;                                              \
         u2 arrayInfo;                                                       \
+        Taint newTaint;                                                     \
         EXPORT_PC();                                                        \
         vdst = INST_AA(inst);       /* AA: source value */                  \
         arrayInfo = FETCH(1);                                               \
@@ -564,9 +565,11 @@ GOTO_TARGET_DECL(exceptionThrown);
         ((_type*)(void*)arrayObj->contents)[GET_REGISTER(vsrc2)] =          \
             GET_REGISTER##_regsize(vdst);                                   \
 /* ifdef WITH_TAINT_TRACKING */						    \
-	SET_ARRAY_TAINT(arrayObj,                                           \
-		(GET_ARRAY_TAINT(arrayObj) |                                \
-		 GET_REGISTER_TAINT##_regsize(vdst)) );                     \
+    newTaint.tag = GET_REGISTER_TAINT##_regsize(vdst);                      \
+    SET_ARRAY_INDEX_TAINT(arrayObj, newTaint, GET_REGISTER(vsrc2));         \
+	/*SET_ARRAY_TAINT(arrayObj,                                           */\
+		/*(GET_ARRAY_TAINT(arrayObj) |                                */\
+		 /*GET_REGISTER_TAINT##_regsize(vdst)) );                     */\
 /* endif */								    \
     }                                                                       \
     FINISH(2);

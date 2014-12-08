@@ -898,6 +898,20 @@ void* dvmHeapSourceAllocAndGrow(size_t n)
     return ptr;
 }
 
+#ifdef WITH_TAINT_TRACKING
+/* Frees the item taints array if it exists. */
+static void dvmFreeItemTaints(Object *obj) {
+    ArrayObject *arrObj;
+    if (obj != NULL && obj->clazz->descriptor[0] == '[') {
+        arrObj = (ArrayObject *) obj;
+        if (arrObj->itemTaint != NULL) {
+            free(arrObj->itemTaint);
+            arrObj->itemTaint = NULL;
+        }
+    }
+}
+#endif /* WITH_TAINT_TRACKING */
+
 /*
  * Frees the first numPtrs objects in the ptrs list and returns the
  * amount of reclaimed storage. The list must contain addresses all in
@@ -941,6 +955,11 @@ size_t dvmHeapSourceFreeList(size_t numPtrs, void **ptrs)
             assert(ptr2heap(gHs, ptrs[0]) == heap);
             countFree(heap, ptrs[0], &numBytes);
             void *merged = ptrs[0];
+
+#ifdef WITH_TAINT_TRACKING
+            dvmFreeItemTaints((Object *) ptrs[0]);
+#endif
+
             for (size_t i = 1; i < numPtrs; i++) {
                 assert(merged != NULL);
                 assert(ptrs[i] != NULL);

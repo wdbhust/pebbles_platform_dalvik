@@ -86,7 +86,8 @@ u4 getObjectTaint(Object* obj, const char* descriptor)
 	/* Get the taint from the array */
 	arrObj = (ArrayObject*) obj;
 	if (arrObj != NULL) {
-	    return arrObj->taint.tag;
+	    //return arrObj->taint.tag;
+        return dvmCalculateArrayTaint(arrObj).tag;
 	}
     } 
     
@@ -94,7 +95,8 @@ u4 getObjectTaint(Object* obj, const char* descriptor)
     StringObject * strObj = (StringObject*) obj;
 	arrObj = strObj->array();
 	if (arrObj != NULL) {
-	    return arrObj->taint.tag;
+	    // return arrObj->taint.tag;
+        return dvmCalculateArrayTaint(arrObj).tag;
 	} /* else, empty string? don't worry about it */
     } 
 
@@ -119,14 +121,20 @@ void addObjectTaint(Object* obj, const char* descriptor, u4 tag)
 	/* Get the taint from the array */
 	arrObj = (ArrayObject*) obj;
 	if (arrObj != NULL) {
-	    arrObj->taint.tag |= tag;
+	    // arrObj->taint.tag |= tag;
+        Taint taint;
+        taint.tag = tag;
+        dvmUpdateArrayIndexTaints(arrObj, taint);
 	}
     } 
     
     if (strcmp(descriptor, "Ljava/lang/String;") == 0) {
 	arrObj = ((StringObject*) obj)->array();
 	if (arrObj != NULL) {
-	    arrObj->taint.tag |= tag;
+	    // arrObj->taint.tag |= tag;
+        Taint taint;
+        taint.tag = tag;
+        dvmUpdateArrayIndexTaints(arrObj, taint);
 	} /* else, empty string? don't worry about it */
     } 
 
@@ -168,7 +176,10 @@ void setReturnTaint(u4 tag, u4* rtaint, JValue* pResult,
 	     * this is not right for "[[" or "[L" */
 	    arrObj = (ArrayObject*) pResult->l;
 	    if (arrObj != NULL) {
-		arrObj->taint.tag |= tag;
+		// arrObj->taint.tag |= tag;
+        Taint taint;
+        taint.tag = tag;
+        dvmUpdateArrayIndexTaints(arrObj, taint);
 	    } /* else, method returning null pointer */
 	    break;
 	case 'L':
@@ -178,7 +189,10 @@ void setReturnTaint(u4 tag, u4* rtaint, JValue* pResult,
 		if (strcmp(descriptor, "Ljava/lang/String;") == 0) {
 		    arrObj = ((StringObject*) obj)->array();
 		    if (arrObj != NULL) {
-			arrObj->taint.tag |= tag;
+			// arrObj->taint.tag |= tag;
+            Taint taint;
+            taint.tag = tag;
+            dvmUpdateArrayIndexTaints(arrObj, taint);
 		    } /* else, empty string?, don't worry about it */
 		} else {
 		    /* TODO: What about classes derived from String? */
