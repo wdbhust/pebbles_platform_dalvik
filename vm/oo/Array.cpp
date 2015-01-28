@@ -664,7 +664,7 @@ Taint dvmCalculateArrayTaint(ArrayObject *array)
         array->taintCache = newTaint;
         array->dirty = ARRAY_CLEAN_TAINT;
     }
-    return newTaint;
+	return array->taintCache;
 }
 
 /* Update the taint for each of the itemTaints. */
@@ -698,16 +698,18 @@ void dvmCopyArrayIndexTaints(ArrayObject *dst, u4 dstPos,
         ArrayObject *src, u4 srcPos, u4 count)
 {
     u4 index;
-    if (dst->itemTaint != NULL) {
-      if (src->itemTaint == NULL) {
-          dvmAllocateItemTaint(src);
-      }
-      for (index = 0; index < count; index++)
-      {
-          dst->itemTaint[index + dstPos].tag =
-              src->itemTaint[index + srcPos].tag;
-      }
-    }
+    if (dst->itemTaint == NULL) {
+          dvmAllocateItemTaint(dst);
+	}
+	if (src->itemTaint == NULL) {
+		dvmAllocateItemTaint(src);
+  	}
+  	for (index = 0; index < count; index++)
+  	{
+	  	dst->itemTaint[index + dstPos].tag =
+		  src->itemTaint[index + srcPos].tag;
+  	}
+    dst->dirty = ARRAY_DIRTY_TAINT;
 }
 
 /* Sets the item array to a given taint. */
@@ -736,6 +738,7 @@ void dvmUpdateArrayIndexTaint(ArrayObject *arrObj, Taint tag,
     }
     if (pos < arrObj->length) {
         arrObj->itemTaint[pos].tag = arrObj->itemTaint[pos].tag | tag.tag;
+        arrObj->dirty = ARRAY_DIRTY_TAINT;
     } else {
         ALOGE("dvmUpdateArrayIndexTaint: array index out of bounds.");
         dvmAbort();

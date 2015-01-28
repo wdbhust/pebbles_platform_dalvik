@@ -219,7 +219,7 @@ static void Dalvik_java_lang_System_arraycopy(const u4* args, JValue* pResult)
             dstArray->taint.tag |= (srcArray->taint.tag | srcPosTaint);
         }
         */
-        dvmCopyArrayIndexTaints(dstArray, srcPos, srcArray, srcPos, length);
+        dvmCopyArrayIndexTaints(dstArray, dstPos, srcArray, srcPos, length);
 #endif
     } else {
         /*
@@ -252,7 +252,7 @@ static void Dalvik_java_lang_System_arraycopy(const u4* args, JValue* pResult)
                 dstArray->taint.tag |= (srcArray->taint.tag | srcPosTaint);
             }
             */
-            dvmCopyArrayIndexTaints(dstArray, srcPos, srcArray, srcPos, length);
+            dvmCopyArrayIndexTaints(dstArray, dstPos, srcArray, srcPos, length);
 #endif
         } else {
             /*
@@ -308,7 +308,7 @@ static void Dalvik_java_lang_System_arraycopy(const u4* args, JValue* pResult)
                 dstArray->taint.tag |= (srcArray->taint.tag | srcPosTaint);
             }
             */
-            dvmCopyArrayIndexTaints(dstArray, srcPos, srcArray, srcPos, length);
+            dvmCopyArrayIndexTaints(dstArray, dstPos, srcArray, srcPos, length);
 #endif
             if (copyCount != length) {
                 dvmThrowArrayStoreExceptionIncompatibleArrayElement(srcPos + copyCount,
