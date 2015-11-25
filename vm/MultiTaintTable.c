@@ -181,7 +181,7 @@ END:
 /*
  * Looks up the multi-taint for the multi-taint composed of t1 and t2.
  * If missing, it creates the multi-taint.
- * Returns the ID of that taint, which is always non-zero. In ca;se
+ * Returns the ID of that taint, which is always non-zero. In case
  * of error, it returns an ID of 0.
  */
 u4 dvmMultiTaintTableLookupAndCreateByCombinedGuids(u4 t1, u4 t2)
